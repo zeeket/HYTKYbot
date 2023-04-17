@@ -13,6 +13,7 @@ Microservice for a Telegram bot.
 
 ## New image uploading
 
+- `git tag v1.0.0`
 - `git push origin v1.0.0`
 
 New image will be tagged and pushed to the GitHub container registry when a tag contains a semantic versioning number prefixed with a letter v.
