@@ -1,12 +1,12 @@
 {
-  "name": "bot",
+  "name": "hytkybot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API for group membership checking Telegram bot",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "pnpm exec eslint . --ext .ts",
-    "start": "ts-node index.ts"
+    "start": "ts-node app.ts"
   },
   "keywords": [],
   "author": "",

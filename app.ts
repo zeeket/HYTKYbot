@@ -28,6 +28,7 @@ const isMemberInAnyChat = async (userId: number, groupChatIds: number[], bot: Te
 }
 
 const isBotInAllGroups = async (groupChatIds: number[], bot:Telegraf): Promise<boolean> => {
+  console.log('Checking if bot is in all groups')
   const botId = await bot.telegram.getMe().then((botInfo) => botInfo.id);
   const allPromiseResults:boolean[] = await Promise.all(groupChatIds.map( (groupChatId) => {
     return (bot.telegram.getChatMember(groupChatId, botId) != null)
@@ -36,6 +37,7 @@ const isBotInAllGroups = async (groupChatIds: number[], bot:Telegraf): Promise<b
 }
 
 if (process.env.TG_BOT_TOKEN) {
+  console.log("My bot token is " + Array(process.env.TG_BOT_TOKEN.length).join("*"))
   const app = new Koa()
   app.use(koaBody())
 
@@ -46,33 +48,44 @@ if (process.env.TG_BOT_TOKEN) {
     console.error('No active group ID provided')
     process.exit(1)
   }
+  console.log('Admin groups:', process.env.TG_ADMIN_GROUP_IDS)
+  console.log('Active groups:', process.env.TG_ACTIVE_GROUP_IDS)
 
   const adminGroups = process.env.TG_ADMIN_GROUP_IDS.split(',').map(id => parseInt(id))
   const activeGroups = process.env.TG_ACTIVE_GROUP_IDS.split(',').map(id => parseInt(id))
   
   const bot = new Telegraf(process.env.TG_BOT_TOKEN)
-  //todo check if bot is in all groups
+  
+  const allGroups = adminGroups.concat(activeGroups)
+  isBotInAllGroups(allGroups, bot).then( (result) => {
+    if (!result) {
+      console.error('Bot is not in all groups')
+      process.exit(1)
+    }
+  })
 
   app.use(async (ctx) => {
-    //console.log(ctx.request.body)
     if (ctx.request.body && ctx.request.body.user) {
       if (await isMemberInAnyChat(ctx.request.body.user, adminGroups, bot)) {
         ctx.body = JSON.stringify({role: 'admin'})
       } else if (await isMemberInAnyChat(ctx.request.body.user, activeGroups, bot)) {
         ctx.body = JSON.stringify({role: 'active'})
       } else {
-        //TODO nakki groups(?)
+        //TODO nakki groups(?) - currently everyone in the world is a nakki
       ctx.body = JSON.stringify({role: 'nakki'})
       }
     } else {
       ctx.body = 'No user ID provided'
+      ctx.status = 400
     }
   })
 
   // Enable graceful stop
   process.once("SIGINT", () => bot.stop("SIGINT"));
   process.once("SIGTERM", () => bot.stop("SIGTERM"));
+
   app.listen(port, () => { console.log('Listening on port', port) })
+
 } else {
   console.error('No token provided')
   process.exit(1)
