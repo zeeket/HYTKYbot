@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# todo: use tsc to transpile in `pnpm build` and remove this section
+.github/workflows/build.yml
