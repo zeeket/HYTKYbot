@@ -1,0 +1,3 @@
+The .env file contains all the secrets expected by the application. These secrets should always be used by the Docker container: use `docker build --no-cache -t hytkybot . && docker run --name hytkybot -p 3000:3000 --env-file .env hytkybot`. The access to .env is blocked for you due to security reasons (I don't want you reading my API keys). Just assume the .env file exists and you can pass it to Docker.
+
+Never (for any reason) bypass validating environment variables. If we need to test something, use mocks instead of bypassing validations.
