@@ -5,6 +5,14 @@ import * as dotenv from 'dotenv'
 import { v4 as uuidv4 } from 'uuid'
 import logger from './logger'
 
+interface RequestWithBody<T = Record<string, unknown>> extends Koa.Request {
+  body?: T
+}
+
+interface UserRequestBody {
+  user: number
+}
+
 dotenv.config()
 
 const port = process.env.PORT || 3000
@@ -13,7 +21,7 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000 // 15 minutes
 const RATE_LIMIT_MAX_REQUESTS = 100
 
-const rateLimitMiddleware = async (ctx: any, next: () => Promise<void>) => {
+const rateLimitMiddleware = async (ctx: Koa.Context, next: () => Promise<void>) => {
   const ip = ctx.ip || ctx.request.ip
   const now = Date.now()
   
@@ -74,7 +82,7 @@ const isBotInAllGroups = async (groupChatIds: number[], bot: Telegraf): Promise<
   }
 }
 
-const isValidUserId = (userId: any): userId is number => {
+const isValidUserId = (userId: unknown): userId is number => {
   return typeof userId === 'number' && Number.isInteger(userId) && userId > 0
 }
 
@@ -136,8 +144,8 @@ if (process.env.TG_BOT_TOKEN) {
       userAgent: ctx.get('User-Agent')
     })
 
-    if ((ctx.request as any).body && (ctx.request as any).body.user) {
-      const userId = (ctx.request as any).body.user
+    if ((ctx.request as RequestWithBody<UserRequestBody>).body && (ctx.request as RequestWithBody<UserRequestBody>).body?.user) {
+      const userId = (ctx.request as RequestWithBody<UserRequestBody>).body!.user
       
       // Input validation
       if (!isValidUserId(userId)) {

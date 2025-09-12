@@ -1,5 +1,5 @@
 # Multi-stage build for security and size optimization
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -19,7 +19,7 @@ COPY app.ts logger.ts ./
 RUN pnpm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Install pnpm
 RUN npm install -g pnpm
