@@ -18,7 +18,7 @@
     "koa": "^3.2.1",
     "koa-body": "^6.0.1",
     "telegraf": "^4.16.3",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.1",
     "winston": "^3.17.0"
   },
   "devDependencies": {
