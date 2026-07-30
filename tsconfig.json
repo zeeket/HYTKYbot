@@ -6,9 +6,11 @@
     "target": "es6",
     "moduleResolution": "node",
     "sourceMap": true,
+    "rootDir": "src",
     "outDir": "dist",
     "strictNullChecks": true,
     "skipLibCheck": true
   },
-  "lib": ["es2015"]
+  "lib": ["es2015"],
+  "include": ["src/**/*.ts"]
 }

@@ -3,10 +3,11 @@
   "version": "1.1.1",
   "description": "API for group membership checking Telegram bot",
   "main": "dist/app.js",
+  "packageManager": "pnpm@11.16.0",
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "ts-node app.ts",
+    "dev": "ts-node src/app.ts",
     "lint": "pnpm exec eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -10,10 +10,10 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml tsconfig.json ./
 
 # Install dependencies (use --force to recreate lockfile if needed)
-RUN pnpm install --frozen-lockfile || pnpm install --force
+RUN pnpm install --frozen-lockfile --trust-lockfile || pnpm install --force --trust-lockfile
 
 # Copy source code
-COPY app.ts logger.ts ./
+COPY src ./src
 
 # Build the application
 RUN pnpm run build
@@ -33,7 +33,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # Install only production dependencies (use --force to recreate lockfile if needed)
-RUN pnpm install --frozen-lockfile --prod || pnpm install --force --prod
+RUN pnpm install --frozen-lockfile --prod --trust-lockfile || pnpm install --force --prod --trust-lockfile
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
