@@ -5,10 +5,6 @@ import * as dotenv from 'dotenv'
 import { v4 as uuidv4 } from 'uuid'
 import logger from './logger'
 
-interface RequestWithBody<T = Record<string, unknown>> extends Koa.Request {
-  body?: T
-}
-
 interface UserRequestBody {
   user: number
 }
@@ -86,6 +82,10 @@ const isValidUserId = (userId: unknown): userId is number => {
   return typeof userId === 'number' && Number.isInteger(userId) && userId > 0
 }
 
+const isUserRequestBody = (body: unknown): body is UserRequestBody => {
+  return typeof body === 'object' && body !== null && 'user' in body
+}
+
 if (process.env.TG_BOT_TOKEN) {
   logger.info('Bot token configured successfully')
   const app = new Koa()
@@ -144,9 +144,11 @@ if (process.env.TG_BOT_TOKEN) {
       userAgent: ctx.get('User-Agent')
     })
 
-    if ((ctx.request as RequestWithBody<UserRequestBody>).body && (ctx.request as RequestWithBody<UserRequestBody>).body?.user) {
-      const userId = (ctx.request as RequestWithBody<UserRequestBody>).body!.user
-      
+    const requestBody = ctx.request.body
+
+    if (isUserRequestBody(requestBody)) {
+      const userId = requestBody.user
+
       // Input validation
       if (!isValidUserId(userId)) {
         logger.warn('Invalid user ID provided', { requestId, userId })
