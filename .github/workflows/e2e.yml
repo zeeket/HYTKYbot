@@ -1,0 +1,34 @@
+name: E2E
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --trust-lockfile
+
+      - name: Run e2e tests
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TEST_TG_BOT_TOKEN }}
+          TG_ADMIN_GROUP_IDS: ${{ secrets.TEST_TG_ADMIN_GROUP_IDS }}
+          TG_ACTIVE_GROUP_IDS: ${{ secrets.TEST_TG_ACTIVE_GROUP_IDS }}
+          TEST_USER_ID: ${{ secrets.TEST_USER_ID }}
+        run: pnpm test

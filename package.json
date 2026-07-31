@@ -9,7 +9,7 @@
     "start": "node dist/app.js",
     "dev": "ts-node src/app.ts",
     "lint": "pnpm exec eslint . --ext .ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@types/jest": "^30.0.0",
     "@types/koa": "^3.0.3",
     "@types/node": "^24.3.1",
     "@types/uuid": "^11.0.0",
@@ -33,6 +34,8 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^18.2.2",
     "eslint-plugin-promise": "^7.3.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
