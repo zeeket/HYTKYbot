@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import logger from './logger'
 
 interface UserRequestBody {
-  user: number
+  user: string | number
 }
 
 dotenv.config()
@@ -78,8 +78,19 @@ const isBotInAllGroups = async (groupChatIds: number[], bot: Telegraf): Promise<
   }
 }
 
-const isValidUserId = (userId: unknown): userId is number => {
-  return typeof userId === 'number' && Number.isInteger(userId) && userId > 0
+// The main HYTKY app sends the Telegram user ID as a numeric string
+// (see checkUserRole.ts), so numeric strings must be accepted here too.
+const parseUserId = (userId: unknown): number | null => {
+  if (typeof userId === 'number' && Number.isInteger(userId) && userId > 0) {
+    return userId
+  }
+  if (typeof userId === 'string' && /^\d+$/.test(userId)) {
+    const parsed = Number(userId)
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+  return null
 }
 
 const isUserRequestBody = (body: unknown): body is UserRequestBody => {
@@ -146,12 +157,18 @@ if (process.env.TG_BOT_TOKEN) {
 
     const requestBody = ctx.request.body
 
-    if (isUserRequestBody(requestBody)) {
-      const userId = requestBody.user
+    logger.debug('Parsed request body', { requestId, requestBody })
 
+    if (isUserRequestBody(requestBody)) {
       // Input validation
-      if (!isValidUserId(userId)) {
-        logger.warn('Invalid user ID provided', { requestId, userId })
+      const userId = parseUserId(requestBody.user)
+      if (userId === null) {
+        logger.warn('Invalid user ID provided', {
+          requestId,
+          userId: requestBody.user,
+          userIdType: typeof requestBody.user,
+          rawRequestBody: requestBody
+        })
         ctx.body = JSON.stringify({ error: 'Invalid user ID' })
         ctx.status = 400
         return
@@ -188,7 +205,7 @@ if (process.env.TG_BOT_TOKEN) {
         ctx.status = 500
       }
     } else {
-      logger.warn('Request missing user ID', { requestId })
+      logger.warn('Request missing user ID', { requestId, rawRequestBody: requestBody })
       ctx.body = JSON.stringify({ error: 'No user ID provided' })
       ctx.status = 400
     }
