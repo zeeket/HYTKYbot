@@ -1,6 +1,6 @@
 {
   "name": "hytkybot",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "API for group membership checking Telegram bot",
   "main": "dist/app.js",
   "packageManager": "pnpm@11.16.0",
@@ -16,9 +16,9 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^17.4.2",
+    "grammy": "^1.45.1",
     "koa": "^3.2.1",
     "koa-body": "^8.0.0",
-    "telegraf": "^4.16.3",
     "uuid": "^14.0.1",
     "winston": "^3.19.0"
   },

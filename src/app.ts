@@ -1,4 +1,4 @@
-import { Telegraf } from 'telegraf'
+import { Bot } from 'grammy'
 import Koa from 'koa'
 import koaBody from 'koa-body'
 import * as dotenv from 'dotenv'
@@ -36,10 +36,10 @@ const rateLimitMiddleware = async (ctx: Koa.Context, next: () => Promise<void>) 
   }
 }
 
-const isMemberInChat = async (userId: number, groupChatId: number, bot: Telegraf): Promise<boolean> => {
+const isMemberInChat = async (userId: number, groupChatId: number, bot: Bot): Promise<boolean> => {
   logger.debug('Checking if user is in chat', { userId, groupChatId })
   try {
-    const chatMember = await bot.telegram.getChatMember(groupChatId, userId);
+    const chatMember = await bot.api.getChatMember(groupChatId, userId);
     const isMember = ['member', 'administrator', 'creator'].includes(chatMember.status);
     logger.debug('Chat membership check result', { userId, groupChatId, isMember, status: chatMember.status })
     return isMember;
@@ -49,20 +49,20 @@ const isMemberInChat = async (userId: number, groupChatId: number, bot: Telegraf
   }
 }
 
-const isMemberInAnyChat = async (userId: number, groupChatIds: number[], bot: Telegraf): Promise<boolean> => {
+const isMemberInAnyChat = async (userId: number, groupChatIds: number[], bot: Bot): Promise<boolean> => {
   const allPromiseResults:boolean[] = await Promise.all(groupChatIds.map( (groupChatId) => {
     return isMemberInChat(userId, groupChatId, bot)
   }))
   return allPromiseResults.some( (result) => result )
 }
 
-const isBotInAllGroups = async (groupChatIds: number[], bot: Telegraf): Promise<boolean> => {
+const isBotInAllGroups = async (groupChatIds: number[], bot: Bot): Promise<boolean> => {
   logger.info('Checking if bot is in all groups', { groupChatIds })
   try {
-    const botId = await bot.telegram.getMe().then((botInfo) => botInfo.id);
+    const botId = await bot.api.getMe().then((botInfo) => botInfo.id);
     const allPromiseResults: boolean[] = await Promise.all(groupChatIds.map(async (groupChatId) => {
       try {
-        await bot.telegram.getChatMember(groupChatId, botId);
+        await bot.api.getChatMember(groupChatId, botId);
         return true;
       } catch (error) {
         logger.warn('Bot not found in group', { groupChatId, error: error instanceof Error ? error.message : String(error) });
@@ -121,7 +121,7 @@ if (process.env.TG_BOT_TOKEN) {
   const adminGroups = process.env.TG_ADMIN_GROUP_IDS.split(',').map(id => parseInt(id))
   const activeGroups = process.env.TG_ACTIVE_GROUP_IDS.split(',').map(id => parseInt(id))
   
-  const bot = new Telegraf(process.env.TG_BOT_TOKEN)
+  const bot = new Bot(process.env.TG_BOT_TOKEN)
   
   const allGroups = adminGroups.concat(activeGroups)
   isBotInAllGroups(allGroups, bot).then((result) => {
@@ -210,9 +210,6 @@ if (process.env.TG_BOT_TOKEN) {
       ctx.status = 400
     }
   })
-
-  process.once("SIGINT", () => bot.stop("SIGINT"));
-  process.once("SIGTERM", () => bot.stop("SIGTERM"));
 
   app.listen(port, () => {
     logger.info('Server started successfully', { port, environment: process.env.NODE_ENV || 'development' })
