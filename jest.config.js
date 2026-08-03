@@ -5,4 +5,5 @@ module.exports = {
   rootDir: '.',
   testMatch: ['<rootDir>/e2e/**/*.e2e.test.ts'],
   testTimeout: 30000,
+  setupFiles: ['dotenv/config'],
 }
