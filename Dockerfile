@@ -7,7 +7,7 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml tsconfig.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 
 # Install dependencies (use --force to recreate lockfile if needed)
 RUN pnpm install --frozen-lockfile --trust-lockfile || pnpm install --force --trust-lockfile
@@ -30,7 +30,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup -u 1001
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install only production dependencies (use --force to recreate lockfile if needed)
 RUN pnpm install --frozen-lockfile --prod --trust-lockfile || pnpm install --force --prod --trust-lockfile

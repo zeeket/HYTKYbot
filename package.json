@@ -1,6 +1,6 @@
 {
   "name": "hytkybot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "API for group membership checking Telegram bot",
   "main": "dist/app.js",
   "packageManager": "pnpm@11.16.0",
