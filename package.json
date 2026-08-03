@@ -23,7 +23,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
+    "@eslint/js": "^9.39.5",
     "@types/jest": "^30.0.0",
     "@types/koa": "^3.0.3",
     "@types/node": "^26.1.2",
