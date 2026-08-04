@@ -32,7 +32,7 @@ const waitForHealth = async (baseUrl: string): Promise<void> => {
 }
 
 export const startServer = async (port: number): Promise<TestServer> => {
-  const requiredEnvVars = ['TG_BOT_TOKEN', 'TG_ADMIN_GROUP_IDS', 'TG_ACTIVE_GROUP_IDS']
+  const requiredEnvVars = ['TG_BOT_TOKEN', 'TG_ADMIN_GROUP_IDS', 'TG_ACTIVE_GROUP_IDS', 'TG_ANNOUNCEMENT_GROUP_IDS']
   const missing = requiredEnvVars.filter((name) => !process.env[name])
   if (missing.length > 0) {
     throw new Error(

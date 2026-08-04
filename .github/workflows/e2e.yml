@@ -30,5 +30,6 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TEST_TG_BOT_TOKEN }}
           TG_ADMIN_GROUP_IDS: ${{ secrets.TEST_TG_ADMIN_GROUP_IDS }}
           TG_ACTIVE_GROUP_IDS: ${{ secrets.TEST_TG_ACTIVE_GROUP_IDS }}
+          TG_ANNOUNCEMENT_GROUP_IDS: ${{ secrets.TEST_TG_ANNOUNCEMENT_GROUP_IDS }}
           TEST_USER_ID: ${{ secrets.TEST_USER_ID }}
         run: pnpm test

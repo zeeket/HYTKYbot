@@ -10,6 +10,8 @@ Microservice for a Telegram bot.
 - `docker run -p 3000:3000 --env-file .env --name myHytkyBotContainer hytkybot`
 - HTTP POST `localhost:3000` with JSON object with the key "user" with the Telegram user ID you want to check
 - server will respond with JSON object containing "role" and a value of "admin", "active" or "nakki" (user not found in groups)
+- HTTP POST `localhost:3000/announce` with a JSON object with the key "message" to send that message to all groups configured in `TG_ANNOUNCEMENT_GROUP_IDS`
+- server will respond with JSON object containing "results", an array with one entry per announcement group indicating whether the send succeeded
 
 ## New image uploading
 

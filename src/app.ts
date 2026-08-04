@@ -9,6 +9,10 @@ interface UserRequestBody {
   user: string | number
 }
 
+interface AnnouncementRequestBody {
+  message: string
+}
+
 dotenv.config()
 
 const port = process.env.PORT || 3000
@@ -97,6 +101,28 @@ const isUserRequestBody = (body: unknown): body is UserRequestBody => {
   return typeof body === 'object' && body !== null && 'user' in body
 }
 
+const isAnnouncementRequestBody = (body: unknown): body is AnnouncementRequestBody => {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    typeof (body as AnnouncementRequestBody).message === 'string' &&
+    (body as AnnouncementRequestBody).message.trim().length > 0
+  )
+}
+
+const sendAnnouncement = async (message: string, groupChatIds: number[], bot: Bot) => {
+  return Promise.all(groupChatIds.map(async (groupChatId) => {
+    try {
+      const result = await bot.api.sendMessage(groupChatId, message)
+      logger.info('Announcement sent', { groupChatId, messageId: result.message_id })
+      return { groupChatId, success: true, result }
+    } catch (error) {
+      logger.error('Error sending announcement', { groupChatId, error: error instanceof Error ? error.message : String(error) })
+      return { groupChatId, success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  }))
+}
+
 if (process.env.TG_BOT_TOKEN) {
   logger.info('Bot token configured successfully')
   const app = new Koa()
@@ -111,19 +137,24 @@ if (process.env.TG_BOT_TOKEN) {
   } else if (!process.env.TG_ACTIVE_GROUP_IDS) {
     logger.error('No active group ID provided')
     process.exit(1)
+  } else if (!process.env.TG_ANNOUNCEMENT_GROUP_IDS) {
+    logger.error('No announcement group ID provided')
+    process.exit(1)
   }
-  
+
   logger.info('Configuration loaded', {
     adminGroups: process.env.TG_ADMIN_GROUP_IDS,
-    activeGroups: process.env.TG_ACTIVE_GROUP_IDS
+    activeGroups: process.env.TG_ACTIVE_GROUP_IDS,
+    announcementGroups: process.env.TG_ANNOUNCEMENT_GROUP_IDS
   })
 
   const adminGroups = process.env.TG_ADMIN_GROUP_IDS.split(',').map(id => parseInt(id))
   const activeGroups = process.env.TG_ACTIVE_GROUP_IDS.split(',').map(id => parseInt(id))
-  
+  const announcementGroups = process.env.TG_ANNOUNCEMENT_GROUP_IDS.split(',').map(id => parseInt(id))
+
   const bot = new Bot(process.env.TG_BOT_TOKEN)
-  
-  const allGroups = adminGroups.concat(activeGroups)
+
+  const allGroups = adminGroups.concat(activeGroups).concat(announcementGroups)
   isBotInAllGroups(allGroups, bot).then((result) => {
     if (!result) {
       logger.error('Bot is not in all required groups', { allGroups })
@@ -137,6 +168,25 @@ if (process.env.TG_BOT_TOKEN) {
   app.use(async (ctx, next) => {
     if (ctx.path === '/health') {
       ctx.body = { status: 'healthy', timestamp: new Date().toISOString() }
+      ctx.status = 200
+      return
+    }
+    await next()
+  })
+
+  app.use(async (ctx, next) => {
+    if (ctx.path === '/announce' && ctx.method === 'POST') {
+      const requestBody = ctx.request.body
+
+      if (!isAnnouncementRequestBody(requestBody)) {
+        logger.warn('Invalid announcement request body', { rawRequestBody: requestBody })
+        ctx.body = JSON.stringify({ error: 'Invalid or missing message' })
+        ctx.status = 400
+        return
+      }
+
+      const results = await sendAnnouncement(requestBody.message, announcementGroups, bot)
+      ctx.body = JSON.stringify({ results })
       ctx.status = 200
       return
     }
