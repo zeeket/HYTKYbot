@@ -11,6 +11,7 @@ interface UserRequestBody {
 
 interface AnnouncementRequestBody {
   message: string
+  user?: string | number
 }
 
 dotenv.config()
@@ -123,6 +124,17 @@ const sendAnnouncement = async (message: string, groupChatIds: number[], bot: Bo
   }))
 }
 
+const sendDirectMessage = async (message: string, userId: number, bot: Bot) => {
+  try {
+    const result = await bot.api.sendMessage(userId, message)
+    logger.info('Direct message sent', { userId, messageId: result.message_id })
+    return [{ userId, success: true, result }]
+  } catch (error) {
+    logger.error('Error sending direct message', { userId, error: error instanceof Error ? error.message : String(error) })
+    return [{ userId, success: false, error: error instanceof Error ? error.message : String(error) }]
+  }
+}
+
 if (process.env.TG_BOT_TOKEN) {
   logger.info('Bot token configured successfully')
   const app = new Koa()
@@ -182,6 +194,21 @@ if (process.env.TG_BOT_TOKEN) {
         logger.warn('Invalid announcement request body', { rawRequestBody: requestBody })
         ctx.body = JSON.stringify({ error: 'Invalid or missing message' })
         ctx.status = 400
+        return
+      }
+
+      if (requestBody.user !== undefined) {
+        const userId = parseUserId(requestBody.user)
+        if (userId === null) {
+          logger.warn('Invalid user ID provided for direct announcement', { rawUser: requestBody.user })
+          ctx.body = JSON.stringify({ error: 'Invalid user ID' })
+          ctx.status = 400
+          return
+        }
+
+        const results = await sendDirectMessage(requestBody.message, userId, bot)
+        ctx.body = JSON.stringify({ results })
+        ctx.status = 200
         return
       }
 

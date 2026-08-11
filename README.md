@@ -12,6 +12,7 @@ Microservice for a Telegram bot.
 - server will respond with JSON object containing "role" and a value of "admin", "active" or "nakki" (user not found in groups)
 - HTTP POST `localhost:3000/announce` with a JSON object with the key "message" to send that message to all groups configured in `TG_ANNOUNCEMENT_GROUP_IDS`
 - server will respond with JSON object containing "results", an array with one entry per announcement group indicating whether the send succeeded
+- add a "user" key (a Telegram user ID) to that same request to send the message directly to that user instead of the announcement groups — the user must have started a conversation with the bot beforehand, or the send will fail
 
 ## New image uploading
 
