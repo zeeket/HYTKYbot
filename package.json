@@ -19,7 +19,7 @@
     "grammy": "^1.45.1",
     "koa": "^3.2.1",
     "koa-body": "^8.0.0",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "winston": "^3.19.0"
   },
   "devDependencies": {
